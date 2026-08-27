@@ -33,7 +33,7 @@ Make sure you have [Node.js](https://nodejs.org/) installed on your computer.
 **1. Clone this repository:**
 
 ```bash
-git clone [https://github.com/hieupcm03/uit_scheduler.git](https://github.com/hieupcm03/uit_scheduler.git)
+git clone https://github.com/hieupcm03/uit_scheduler.git
 ```
 
 **2. Navigate into the project directory:**
