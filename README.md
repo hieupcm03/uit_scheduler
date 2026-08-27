@@ -1,75 +1,64 @@
-# React + TypeScript + Vite
+# 📅 UIT Scheduler
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An automated class scheduling and timetable management tool designed specifically to help students build conflict-free schedules effortlessly from Excel data.
 
-Currently, two official plugins are available:
+## 🌟 Introduction
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Registering for classes and arranging a timetable manually can be time-consuming and prone to human error. **UIT Scheduler** is a client-side web application that solves this problem. Users can simply upload their university's provided Excel timetable file, input their desired course codes, and let the system automatically generate a visual schedule while actively preventing time conflicts.
 
-## React Compiler
+## ✨ Key Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Excel Data Parsing:** Directly reads and processes `.xlsx` or `.xls` files in the browser without needing a backend server.
+- **Smart Filtering:** Quickly search and select courses by class codes.
+- **Conflict Detection:** Automatically warns users if a selected class overlaps with existing ones in the schedule.
+- **Visual Timetable:** Renders a clear, easy-to-read weekly calendar grid.
+- **100% Client-Side:** Fast, secure, and privacy-focused as no data is uploaded to external servers.
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Core:** React, TypeScript, Vite
+- **Data Processing:** SheetJS (`xlsx`)
+- **Styling:** CSS / Tailwind CSS (Optional)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🚀 Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Follow these steps to run the project locally on your machine.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
 
+Make sure you have [Node.js](https://nodejs.org/) installed on your computer.
+
+### Installation
+
+**1. Clone this repository:**
+
+```bash
+git clone [https://github.com/hieupcm03/uit_scheduler.git](https://github.com/hieupcm03/uit_scheduler.git)
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+**2. Navigate into the project directory:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+cd uit_scheduler
 ```
+
+**3. Install the required dependencies:**
+
+```bash
+npm install
+```
+
+**4. Start the development server:**
+
+```bash
+npm run dev
+```
+
+**5. View the app:**
+Open your browser and visit `http://localhost:5173/` to view the application.
+
+## 💡 How to Use
+
+- **Step 1:** Click the **Upload** button to select your `.xlsx` timetable file.
+- **Step 2:** Enter the specific **Class Code** (e.g., `SE104.P11`) you want to register for.
+- **Step 3:** Click **Add to Schedule**. The system will verify if it fits and display it on the grid.
