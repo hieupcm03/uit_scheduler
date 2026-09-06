@@ -3,9 +3,13 @@ import type { ScheduleRow } from "../types/scheduletype";
 
 interface SidebarProps {
   masterData: ScheduleRow[];
+  onAddCourse: (course: ScheduleRow) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ masterData }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  masterData,
+  onAddCourse,
+}) => {
   // Biến trạng thái lưu trữ từ khóa người dùng gõ vào thanh tìm kiếm
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -58,8 +62,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ masterData }) => {
           filteredData.map((row, index) => (
             <div
               key={index}
-              draggable
-              className="p-3 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-blue-400 cursor-grab active:cursor-grabbing transition-all group"
+              onClick={() => onAddCourse(row)}
+              className="p-3 bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:border-blue-400 cursor-pointer active:scale-[0.98] transition-all group"
             >
               <div className="font-bold text-blue-700 group-hover:text-blue-800">
                 {row.MAMH} - {row.MALOP}
