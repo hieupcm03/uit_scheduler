@@ -15,7 +15,7 @@ function App() {
       (c) => c.MAMH === course.MAMH && c.MALOP === course.MALOP,
     );
     if (isAlreadyAdded) {
-      alert("Môn học này đã được thêm vào lịch của bạn.");
+      console.warn("Môn học này đã được thêm vào lịch của bạn.");
       return;
     }
     setMySchedule((prevSchedule) => [...prevSchedule, course]);
