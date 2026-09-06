@@ -8,6 +8,19 @@ function App() {
   const [masterData, setMasterData] = useState<ScheduleRow[]>([]);
   const [mySchedule, setMySchedule] = useState<ScheduleRow[]>([]);
 
+  // Hàm xử lý khi người dùng thêm một môn học vào lịch của họ
+  const handleAddCourse = (course: ScheduleRow) => {
+    // Kiểm tra xem môn học đã tồn tại trong lịch chưa
+    const isAlreadyAdded = mySchedule.some(
+      (c) => c.MAMH === course.MAMH && c.MALOP === course.MALOP,
+    );
+    if (isAlreadyAdded) {
+      console.warn("Môn học này đã được thêm vào lịch của bạn.");
+      return;
+    }
+    setMySchedule((prevSchedule) => [...prevSchedule, course]);
+  };
+
   return (
     <div className="h-screen bg-gray-100 font-sans flex flex-col">
       <header className="bg-white shadow-sm px-6 py-4 shrink-0">
@@ -19,7 +32,7 @@ function App() {
           <FileUploader onDataLoaded={setMasterData} />
         ) : (
           <div className="flex gap-6 h-full">
-            <Sidebar masterData={masterData} />
+            <Sidebar masterData={masterData} onAddCourse={handleAddCourse} />
             <Timetable mySchedule={mySchedule} />
           </div>
         )}
