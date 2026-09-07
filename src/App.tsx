@@ -21,6 +21,12 @@ function App() {
     setMySchedule((prevSchedule) => [...prevSchedule, course]);
   };
 
+  // Hàm xử lý xóa môn học
+  const handleRemoveCourse = (rmCourse: string) => {
+    const newSchedule = mySchedule.filter((course) => course.MAMH !== rmCourse);
+    setMySchedule(newSchedule);
+  };
+
   return (
     <div className="h-screen bg-gray-100 font-sans flex flex-col">
       <header className="bg-white shadow-sm px-6 py-4 shrink-0">
@@ -33,7 +39,10 @@ function App() {
         ) : (
           <div className="flex gap-6 h-full">
             <Sidebar masterData={masterData} onAddCourse={handleAddCourse} />
-            <Timetable mySchedule={mySchedule} />
+            <Timetable
+              mySchedule={mySchedule}
+              onRemoveCourse={handleRemoveCourse}
+            />
           </div>
         )}
       </main>

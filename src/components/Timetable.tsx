@@ -3,9 +3,13 @@ import type { ScheduleRow } from "../types/scheduletype";
 
 interface TimetableProps {
   mySchedule: ScheduleRow[];
+  onRemoveCourse: (mamh: string) => void;
 }
 
-export const Timetable: React.FC<TimetableProps> = ({ mySchedule }) => {
+export const Timetable: React.FC<TimetableProps> = ({
+  mySchedule,
+  onRemoveCourse,
+}) => {
   // Định nghĩa trục X (Cột) và trục Y (Hàng) của ma trận
   const days = [2, 3, 4, 5, 6, 7];
   const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -118,6 +122,26 @@ export const Timetable: React.FC<TimetableProps> = ({ mySchedule }) => {
                 }}
                 className={`${themeClass} border-l-4 rounded-md p-2 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all z-10 group relative h-full`}
               >
+                {/* Nút xóa */}
+                <button
+                  onClick={() => onRemoveCourse(course.MAMH)}
+                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-20 shadow-sm cursor-pointer"
+                  title="Xóa môn học này"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
                 {/* Mã Lớp */}
                 <div className="text-xs font-semibold opacity-70 mb-1">
                   {course.MALOP || course.MAMH}
