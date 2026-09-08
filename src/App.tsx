@@ -27,6 +27,7 @@ function App() {
     setMySchedule(newSchedule);
   };
 
+  console.log("Dữ liệu môn học:", mySchedule);
   return (
     <div className="h-screen bg-gray-100 font-sans flex flex-col">
       <header className="bg-white shadow-sm px-6 py-4 shrink-0">

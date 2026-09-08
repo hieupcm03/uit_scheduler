@@ -6,6 +6,26 @@ interface TimetableProps {
   onRemoveCourse: (mamh: string) => void;
 }
 
+// Bảng màu pastel
+const colorThemes = [
+  "bg-blue-50 text-blue-900 border-blue-500",
+  "bg-indigo-50 text-indigo-900 border-indigo-500",
+  "bg-violet-50 text-violet-900 border-violet-500",
+  "bg-fuchsia-50 text-fuchsia-900 border-fuchsia-500",
+  "bg-emerald-50 text-emerald-900 border-emerald-500",
+  "bg-teal-50 text-teal-900 border-teal-500",
+  "bg-amber-50 text-amber-900 border-amber-500",
+];
+
+// Hàm tự động chọn màu dựa vào Mã Lớp
+const getColorTheme = (maLop: string) => {
+  let hash = 0;
+  for (let i = 0; i < maLop.length; i++) {
+    hash = maLop.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colorThemes[Math.abs(hash) % colorThemes.length];
+};
+
 export const Timetable: React.FC<TimetableProps> = ({
   mySchedule,
   onRemoveCourse,
@@ -26,25 +46,30 @@ export const Timetable: React.FC<TimetableProps> = ({
       ? "bg-green-100 text-green-700"
       : "bg-red-100 text-red-700";
 
-  // Bảng màu pastel
-  const colorThemes = [
-    "bg-blue-50 text-blue-900 border-blue-500",
-    "bg-indigo-50 text-indigo-900 border-indigo-500",
-    "bg-violet-50 text-violet-900 border-violet-500",
-    "bg-fuchsia-50 text-fuchsia-900 border-fuchsia-500",
-    "bg-emerald-50 text-emerald-900 border-emerald-500",
-    "bg-teal-50 text-teal-900 border-teal-500",
-    "bg-amber-50 text-amber-900 border-amber-500",
-  ];
+  // Xử lý các môn học có nhiều ngày học (THU) và nhiều tiết học (TIET)
+  const expandedSchedule = mySchedule.flatMap((course) => {
+    if (!course.THU) return [];
 
-  // Hàm tự động chọn màu dựa vào Mã Lớp
-  const getColorTheme = (maLop: string) => {
-    let hash = 0;
-    for (let i = 0; i < maLop.length; i++) {
-      hash = maLop.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return colorThemes[Math.abs(hash) % colorThemes.length];
-  };
+    // Chặt chuỗi thành mảng dựa vào dấu phẩy (vd: "2, 6" -> ["2", "6"])
+    const arrThu = String(course.THU)
+      .split(",")
+      .map((item) => item.trim());
+    const arrTiet = String(course.TIET)
+      .split(",")
+      .map((item) => item.trim());
+    const arrPhong = String(course.PHONGHOC)
+      .split(",")
+      .map((item) => item.trim());
+
+    return arrThu.map((thu, index) => {
+      return {
+        ...course,
+        thuSingle: parseInt(thu, 10),
+        tietSingle: arrTiet[index] || arrTiet[0],
+        phongSingle: arrPhong[index] || arrPhong[0],
+      };
+    });
+  });
 
   return (
     <div className="w-3/4 bg-white rounded-lg shadow-md p-4 flex flex-col h-full border border-gray-200">
@@ -100,31 +125,31 @@ export const Timetable: React.FC<TimetableProps> = ({
           ))}
 
           {/* VẼ CÁC MÔN HỌC ĐÃ ĐĂNG KÝ LÊN SA BÀN */}
-          {mySchedule.map((course, index) => {
-            if (!course.THU || !course.TIET) return null;
+          {expandedSchedule.map((session, index) => {
+            if (!session.thuSingle || !session.tietSingle) return null;
 
-            const tietStr = String(course.TIET);
+            const tietStr = String(session.tietSingle);
             const startPeriod = tietStr.startsWith("10")
               ? 10
               : parseInt(tietStr[0], 10);
             const spanLength = tietStr.replace("10", "X").length;
 
             const themeClass = getColorTheme(
-              String(course.MALOP || course.MAMH),
+              String(session.MALOP || session.MAMH),
             );
 
             return (
               <div
-                key={`course-${index}`}
+                key={`course-${session.MAMH}-${session.thuSingle}`}
                 style={{
-                  gridColumn: course.THU,
+                  gridColumn: session.thuSingle,
                   gridRow: `${startPeriod + 1} / span ${spanLength}`,
                 }}
                 className={`${themeClass} border-l-4 rounded-md p-2 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all z-10 group relative h-full`}
               >
                 {/* Nút xóa */}
                 <button
-                  onClick={() => onRemoveCourse(course.MAMH)}
+                  onClick={() => onRemoveCourse(session.MAMH)}
                   className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-20 shadow-sm cursor-pointer"
                   title="Xóa môn học này"
                 >
@@ -144,12 +169,12 @@ export const Timetable: React.FC<TimetableProps> = ({
                 </button>
                 {/* Mã Lớp */}
                 <div className="text-xs font-semibold opacity-70 mb-1">
-                  {course.MALOP || course.MAMH}
+                  {session.MALOP || session.MAMH}
                 </div>
 
                 {/* Tên Môn Học */}
                 <div className="font-bold text-sm leading-snug mb-3 px-1">
-                  {course.TENMH}
+                  {session.TENMH}
                 </div>
 
                 {/* Thông tin Tiết & Phòng */}
@@ -168,7 +193,7 @@ export const Timetable: React.FC<TimetableProps> = ({
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    <span>Tiết {course.TIET}</span>
+                    <span>Tiết {session.tietSingle}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <svg
@@ -190,13 +215,13 @@ export const Timetable: React.FC<TimetableProps> = ({
                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                       />
                     </svg>
-                    <span>{course.PHONGHOC || "Chưa có phòng"}</span>
+                    <span>{session.phongSingle || "Chưa có phòng"}</span>
                   </div>
                 </div>
 
                 {/* Tên Giảng Viên */}
                 <div className="text-xs font-medium mt-3 pt-2 border-t border-current/10 w-full">
-                  {course.TENGV || "Chưa phân công"}
+                  {session.TENGV || "Chưa phân công"}
                 </div>
               </div>
             );
