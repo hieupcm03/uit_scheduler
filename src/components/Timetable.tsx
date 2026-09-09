@@ -3,7 +3,7 @@ import type { ScheduleRow } from "../types/scheduletype";
 
 interface TimetableProps {
   mySchedule: ScheduleRow[];
-  onRemoveCourse: (mamh: string) => void;
+  onRemoveCourse: (malop: string) => void;
 }
 
 const colorThemes = [
@@ -133,10 +133,11 @@ export const Timetable: React.FC<TimetableProps> = ({
               const themeClass = getColorTheme(
                 String(session.MALOP || session.MAMH),
               );
+              const currentMaLop = String(session.MALOP || session.MAMH);
 
               return (
                 <div
-                  key={`course-${session.MAMH}-${session.thuSingle}`}
+                  key={`course-${currentMaLop}-${session.thuSingle}-${session.tietSingle}`}
                   style={{
                     gridColumn: session.thuSingle,
                     gridRow: `${startPeriod + 1} / span ${spanLength}`,
@@ -144,7 +145,7 @@ export const Timetable: React.FC<TimetableProps> = ({
                   className={`${themeClass} border-l-4 rounded-md p-2 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all z-10 group relative h-full`}
                 >
                   <button
-                    onClick={() => onRemoveCourse(session.MAMH)}
+                    onClick={() => onRemoveCourse(currentMaLop)}
                     className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-20 shadow-sm cursor-pointer"
                     title="Xóa môn học này"
                   >
@@ -193,13 +194,14 @@ export const Timetable: React.FC<TimetableProps> = ({
                 const themeClass = getColorTheme(
                   String(course.MALOP || course.MAMH),
                 );
+                const currentMaLop = String(course.MALOP || course.MAMH);
                 return (
                   <div
-                    key={`special-${course.MAMH}`}
+                    key={`special-${currentMaLop}`}
                     className={`${themeClass} border-l-4 rounded-md p-3 relative group pr-8 flex-1 min-w-[200px] max-w-[300px] shadow-sm`}
                   >
                     <button
-                      onClick={() => onRemoveCourse(course.MAMH)}
+                      onClick={() => onRemoveCourse(currentMaLop)}
                       className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
                     >
                       <svg
