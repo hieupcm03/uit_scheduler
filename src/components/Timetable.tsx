@@ -6,7 +6,6 @@ interface TimetableProps {
   onRemoveCourse: (mamh: string) => void;
 }
 
-// Bảng màu pastel
 const colorThemes = [
   "bg-blue-50 text-blue-900 border-blue-500",
   "bg-indigo-50 text-indigo-900 border-indigo-500",
@@ -17,7 +16,6 @@ const colorThemes = [
   "bg-amber-50 text-amber-900 border-amber-500",
 ];
 
-// Hàm tự động chọn màu dựa vào Mã Lớp
 const getColorTheme = (maLop: string) => {
   let hash = 0;
   for (let i = 0; i < maLop.length; i++) {
@@ -30,34 +28,36 @@ export const Timetable: React.FC<TimetableProps> = ({
   mySchedule,
   onRemoveCourse,
 }) => {
-  // Định nghĩa trục X (Cột) và trục Y (Hàng) của ma trận
   const days = [2, 3, 4, 5, 6, 7];
   const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  // Tính tổng số tín chỉ từ các môn đã xếp vào lịch
   const totalCredits = mySchedule.reduce(
     (sum, row) => sum + (row.SOTC || 0),
     0,
   );
 
-  // Logic kiểm tra: Đạt mốc 12 tín chỉ thì xanh an toàn, dưới 12 thì đỏ cảnh báo
   const badgeColor =
     totalCredits >= 12 && totalCredits <= 24
       ? "bg-green-100 text-green-700"
       : "bg-red-100 text-red-700";
 
-  // Xử lý các môn học có nhiều ngày học (THU) và nhiều tiết học (TIET)
-  const expandedSchedule = mySchedule.flatMap((course) => {
-    if (!course.THU) return [];
+  // 1. CHIA ĐỂ TRỊ: Phân loại môn học
+  const normalCourses = mySchedule.filter(
+    (c) => c.THU && String(c.THU).trim() !== "",
+  );
+  const specialCourses = mySchedule.filter(
+    (c) => !c.THU || String(c.THU).trim() === "",
+  );
 
-    // Chặt chuỗi thành mảng dựa vào dấu phẩy (vd: "2, 6" -> ["2", "6"])
+  // 2. Xử lý môn học bình thường để vẽ lên sa bàn
+  const expandedSchedule = normalCourses.flatMap((course) => {
     const arrThu = String(course.THU)
       .split(",")
       .map((item) => item.trim());
     const arrTiet = String(course.TIET)
       .split(",")
       .map((item) => item.trim());
-    const arrPhong = String(course.PHONGHOC)
+    const arrPhong = String(course.PHONGHOC || "")
       .split(",")
       .map((item) => item.trim());
 
@@ -73,7 +73,7 @@ export const Timetable: React.FC<TimetableProps> = ({
 
   return (
     <div className="w-3/4 bg-white rounded-lg shadow-md p-4 flex flex-col h-full border border-gray-200">
-      {/* Header khu vực TKB */}
+      {/* Header */}
       <div className="flex justify-between items-center mb-4 shrink-0">
         <h2 className="text-lg font-bold text-gray-800">
           Lịch học dự kiến của tôi
@@ -85,103 +85,71 @@ export const Timetable: React.FC<TimetableProps> = ({
         </span>
       </div>
 
-      {/* Khu vực lưới TKB ( có thanh cuộn nếu màn hình nhỏ ) */}
-      <div className="flex-1 overflow-auto bg-gray-50 rounded-lg p-2 border border-gray-200">
-        {/* Ma trận CSS Grid: 7 cột x 11 hàng */}
-        <div className="min-w-[900px] grid grid-cols-7 grid-rows-[auto_repeat(10,_minmax(90px,_auto))] gap-px bg-gray-200 border border-gray-200 rounded-sm">
-          {/* Ô góc trên cùng bên trái (Tiết \ thứ) */}
-          <div className="bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-sm p-2 rounded-tl-sm">
-            Tiết \ Thứ
-          </div>
-
-          {/* Vẽ hàng thứ: Thứ 2 -> Thứ 7 */}
-          {days.map((day) => (
-            <div
-              key={`header-day-${day}`}
-              className="bg-blue-50 text-blue-800 font-bold flex items-center justify-center py-3"
-            >
-              Thứ {day}
+      {/* Khu vực chứa lưới TKB và danh sách môn đặc biệt */}
+      <div className="flex-1 overflow-auto flex flex-col gap-4">
+        {/* LƯỚI THỜI KHÓA BIỂU CHÍNH */}
+        <div className="bg-gray-50 rounded-lg p-2 border border-gray-200 overflow-auto">
+          <div className="min-w-[900px] grid grid-cols-7 grid-rows-[auto_repeat(10,_minmax(90px,_auto))] gap-px bg-gray-200 border border-gray-200 rounded-sm">
+            <div className="bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-sm p-2 rounded-tl-sm">
+              Tiết \ Thứ
             </div>
-          ))}
 
-          {/* Vẽ các hàng tiết học và các ô trống */}
-          {periods.map((period) => (
-            <React.Fragment key={`row-${period}`}>
+            {days.map((day) => (
               <div
-                className="bg-gray-100 font-bold text-gray-600 flex items-center justify-center text-sm"
-                style={{ gridColumn: 1, gridRow: period + 1 }}
+                key={`header-day-${day}`}
+                className="bg-blue-50 text-blue-800 font-bold flex items-center justify-center py-3"
               >
-                Tiết {period}
+                Thứ {day}
               </div>
+            ))}
 
-              {days.map((day) => (
+            {periods.map((period) => (
+              <React.Fragment key={`row-${period}`}>
                 <div
-                  key={`cell-day${day}-period${period}`}
-                  className="bg-white relative hover:bg-blue-50 transition-colors border border-dashed border-transparent hover:border-blue-300"
-                  style={{ gridColumn: day, gridRow: period + 1 }}
-                ></div>
-              ))}
-            </React.Fragment>
-          ))}
-
-          {/* VẼ CÁC MÔN HỌC ĐÃ ĐĂNG KÝ LÊN SA BÀN */}
-          {expandedSchedule.map((session, index) => {
-            if (!session.thuSingle || !session.tietSingle) return null;
-
-            const tietStr = String(session.tietSingle);
-            const startPeriod = tietStr.startsWith("10")
-              ? 10
-              : parseInt(tietStr[0], 10);
-            const spanLength = tietStr.replace("10", "X").length;
-
-            const themeClass = getColorTheme(
-              String(session.MALOP || session.MAMH),
-            );
-
-            return (
-              <div
-                key={`course-${session.MAMH}-${session.thuSingle}`}
-                style={{
-                  gridColumn: session.thuSingle,
-                  gridRow: `${startPeriod + 1} / span ${spanLength}`,
-                }}
-                className={`${themeClass} border-l-4 rounded-md p-2 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all z-10 group relative h-full`}
-              >
-                {/* Nút xóa */}
-                <button
-                  onClick={() => onRemoveCourse(session.MAMH)}
-                  className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-20 shadow-sm cursor-pointer"
-                  title="Xóa môn học này"
+                  className="bg-gray-100 font-bold text-gray-600 flex items-center justify-center text-sm"
+                  style={{ gridColumn: 1, gridRow: period + 1 }}
                 >
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  Tiết {period}
+                </div>
+                {days.map((day) => (
+                  <div
+                    key={`cell-day${day}-period${period}`}
+                    className="bg-white relative hover:bg-blue-50 transition-colors border border-dashed border-transparent hover:border-blue-300"
+                    style={{ gridColumn: day, gridRow: period + 1 }}
+                  ></div>
+                ))}
+              </React.Fragment>
+            ))}
+
+            {/* VẼ CÁC MÔN BÌNH THƯỜNG */}
+            {expandedSchedule.map((session) => {
+              if (!session.thuSingle || !session.tietSingle) return null;
+
+              const tietStr = String(session.tietSingle);
+              const startPeriod = tietStr.startsWith("10")
+                ? 10
+                : parseInt(tietStr[0], 10);
+              const spanLength = tietStr.replace("10", "X").length;
+              const themeClass = getColorTheme(
+                String(session.MALOP || session.MAMH),
+              );
+
+              return (
+                <div
+                  key={`course-${session.MAMH}-${session.thuSingle}`}
+                  style={{
+                    gridColumn: session.thuSingle,
+                    gridRow: `${startPeriod + 1} / span ${spanLength}`,
+                  }}
+                  className={`${themeClass} border-l-4 rounded-md p-2 flex flex-col justify-center items-center text-center shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all z-10 group relative h-full`}
+                >
+                  <button
+                    onClick={() => onRemoveCourse(session.MAMH)}
+                    className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 z-20 shadow-sm cursor-pointer"
+                    title="Xóa môn học này"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-                {/* Mã Lớp */}
-                <div className="text-xs font-semibold opacity-70 mb-1">
-                  {session.MALOP || session.MAMH}
-                </div>
-
-                {/* Tên Môn Học */}
-                <div className="font-bold text-sm leading-snug mb-3 px-1">
-                  {session.TENMH}
-                </div>
-
-                {/* Thông tin Tiết & Phòng */}
-                <div className="text-xs opacity-90 flex flex-col items-center gap-1.5 mt-3">
-                  <div className="flex items-center gap-1.5">
                     <svg
-                      className="w-3.5 h-3.5"
+                      className="w-3 h-3"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -189,44 +157,79 @@ export const Timetable: React.FC<TimetableProps> = ({
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        strokeWidth={3}
+                        d="M6 18L18 6M6 6l12 12"
                       />
                     </svg>
-                    <span>Tiết {session.tietSingle}</span>
+                  </button>
+                  <div className="text-xs font-semibold opacity-70 mb-1">
+                    {session.MALOP || session.MAMH}
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <span>{session.phongSingle || "Chưa có phòng"}</span>
+                  <div className="font-bold text-sm leading-snug mb-3 px-1">
+                    {session.TENMH}
+                  </div>
+                  <div className="text-xs opacity-90 flex flex-col items-center gap-1.5 mt-3">
+                    <div className="flex items-center gap-1.5">
+                      <span>Tiết {session.tietSingle}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span>{session.phongSingle || "Chưa có phòng"}</span>
+                    </div>
                   </div>
                 </div>
-
-                {/* Tên Giảng Viên */}
-                <div className="text-xs font-medium mt-3 pt-2 border-t border-current/10 w-full">
-                  {session.TENGV || "Chưa phân công"}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
+        {/* KHU VỰC CÁC MÔN ĐẶC BIỆT (HT2, Đồ án) */}
+        {specialCourses.length > 0 && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 shrink-0">
+            <h3 className="text-sm font-bold text-gray-700 mb-3 border-b pb-2">
+              Môn học không có lịch cố định (Đồ án, HT2, Thực tập...)
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {specialCourses.map((course) => {
+                const themeClass = getColorTheme(
+                  String(course.MALOP || course.MAMH),
+                );
+                return (
+                  <div
+                    key={`special-${course.MAMH}`}
+                    className={`${themeClass} border-l-4 rounded-md p-3 relative group pr-8 flex-1 min-w-[200px] max-w-[300px] shadow-sm`}
+                  >
+                    <button
+                      onClick={() => onRemoveCourse(course.MAMH)}
+                      className="absolute top-2 right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                    >
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                    <div className="text-xs font-semibold opacity-70 mb-1">
+                      {course.MALOP || course.MAMH}
+                    </div>
+                    <div className="font-bold text-sm">{course.TENMH}</div>
+                    <div className="text-xs mt-2 opacity-80 flex gap-3">
+                      <span>TC: {course.SOTC}</span>
+                      <span>{course.TENGV ? `GV: ${course.TENGV}` : ""}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
