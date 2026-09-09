@@ -20,8 +20,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const searchLower = searchTerm.toLowerCase();
     const maMH = String(row.MAMH || "").toLowerCase();
     const tenMH = String(row.TENMH || "").toLowerCase();
+    const maLop = String(row.MALOP || "").toLowerCase();
 
-    return maMH.includes(searchLower) || tenMH.includes(searchLower);
+    return (
+      maMH.includes(searchLower) ||
+      tenMH.includes(searchLower) ||
+      maLop.includes(searchLower)
+    );
   });
 
   return (
