@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef } from "react";
+import { toPng } from "html-to-image";
 import type { ScheduleRow } from "../types/scheduletype";
 
 interface TimetableProps {
@@ -30,6 +31,8 @@ export const Timetable: React.FC<TimetableProps> = ({
 }) => {
   const days = [2, 3, 4, 5, 6, 7];
   const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+  const timetableRef = useRef<HTMLDivElement>(null); // Khai báo ref tham chiếu tới cái bảng TKB cần chụp
 
   const totalCredits = mySchedule.reduce(
     (sum, row) => sum + (row.SOTC || 0),
@@ -71,6 +74,31 @@ export const Timetable: React.FC<TimetableProps> = ({
     });
   });
 
+  // 4. Hàm xử lý chụp ảnh và tải file về
+  const handleExportImage = () => {
+    const node = timetableRef.current;
+    if (node === null) return;
+
+    toPng(node, {
+      cacheBust: true,
+      backgroundColor: "#f9fafb",
+      width: node.scrollWidth,
+      height: node.scrollHeight,
+      style: {
+        overflow: "visible", // chỉ tắt thanh cuộn trên clone node, không ảnh hưởng đến thẻ div thật
+      },
+    })
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = "Thoi_Khoa_Bieu_UIT.png";
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error("Lỗi khi xuất ảnh: ", err);
+      });
+  };
+
   return (
     <div className="w-3/4 bg-white rounded-lg shadow-md p-4 flex flex-col h-full border border-gray-200">
       {/* Header */}
@@ -78,17 +106,43 @@ export const Timetable: React.FC<TimetableProps> = ({
         <h2 className="text-lg font-bold text-gray-800">
           Lịch học dự kiến của tôi
         </h2>
-        <span
-          className={`text-sm font-medium px-3 py-1 rounded-full shadow-sm transition-colors ${badgeColor}`}
-        >
-          Số TC: {totalCredits}
-        </span>
+
+        <div className="flex items-center gap-3">
+          <span
+            className={`text-sm font-medium px-3 py-1 rounded-full shadow-sm transition-colors ${badgeColor}`}
+          >
+            Số TC: {totalCredits}
+          </span>
+          {/* Nút bấm tải ảnh */}
+          <button
+            onClick={handleExportImage}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow-sm transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Tải Ảnh
+          </button>
+        </div>
       </div>
 
       {/* Khu vực chứa lưới TKB và danh sách môn đặc biệt */}
       <div className="flex-1 overflow-auto flex flex-col gap-4">
         {/* LƯỚI THỜI KHÓA BIỂU CHÍNH */}
-        <div className="bg-gray-50 rounded-lg p-2 border border-gray-200 overflow-auto">
+        <div
+          ref={timetableRef}
+          className="bg-gray-50 rounded-lg p-2 border border-gray-200 overflow-auto"
+        >
           <div className="min-w-[900px] grid grid-cols-7 grid-rows-[auto_repeat(10,_minmax(90px,_auto))] gap-px bg-gray-200 border border-gray-200 rounded-sm">
             <div className="bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-sm p-2 rounded-tl-sm">
               Tiết \ Thứ

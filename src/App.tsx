@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileUploader } from "./components/FileUploader";
 import { Sidebar } from "./components/Sidebar";
 import { Timetable } from "./components/Timetable";
@@ -35,8 +35,24 @@ const getOccupiedSlots = (course: ScheduleRow): string[] => {
 
 function App() {
   const [masterData, setMasterData] = useState<ScheduleRow[]>([]);
-  const [mySchedule, setMySchedule] = useState<ScheduleRow[]>([]);
+  const [mySchedule, setMySchedule] = useState<ScheduleRow[]>(() => {
+    const savedSchedule = localStorage.getItem("uit_my_schedule");
+    if (savedSchedule) {
+      try {
+        return JSON.parse(savedSchedule) as ScheduleRow[];
+      } catch (error) {
+        console.error("Error parsing saved schedule:", error);
+        return [];
+      }
+    }
+    return [];
+  });
   const [errorMessage, setErrorMessage] = useState<string>("");
+
+  // Tự động lưu trữ mỗi khi thêm hoặc xóa môn học khỏi lịch
+  useEffect(() => {
+    localStorage.setItem("uit_my_schedule", JSON.stringify(mySchedule));
+  }, [mySchedule]);
 
   const handleAddCourse = (newCourse: ScheduleRow) => {
     const sameSubjectCourses = mySchedule.filter(
