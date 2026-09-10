@@ -85,8 +85,18 @@ function App() {
     setMySchedule((prevSchedule) => [...prevSchedule, newCourse]);
   };
 
+  // Hàm xử lý xóa môn học
   const handleRemoveCourse = (rmLOP: string) => {
-    const newSchedule = mySchedule.filter((course) => course.MALOP !== rmLOP);
+    const newSchedule = mySchedule.filter((course) => {
+      const currentMaLop = String(course.MALOP || "");
+
+      // Điều kiện 1: Trùng với mã lớp cần xóa
+      const isExactMatch = currentMaLop === rmLOP;
+
+      // Điều kiện 2: Là lớp Thực hành của lớp cần xóa
+      const isPracticalClass = currentMaLop.startsWith(rmLOP + ".");
+      return !(isExactMatch || isPracticalClass);
+    });
     setMySchedule(newSchedule);
   };
 
